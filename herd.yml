@@ -1,0 +1,4 @@
+name: demo_cognito_app
+php: "8.2"
+serve:
+  - path: public

@@ -17,7 +17,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+#Auth::routes();
+
+Route::get('/hello', function () {
+    return view('hello');
+});
 
 /**
  * Routes added below to manage the AWS Cognito change in case you are
@@ -40,11 +44,11 @@ Route::middleware('aws-cognito')->get('/mfa/disable', [App\Http\Controllers\WebM
 Route::middleware('aws-cognito')->get('/mfa/activate', [App\Http\Controllers\WebMFAController::class, 'actionActivateMFA'])->name('cognito.action.mfa.activate');
 Route::middleware('aws-cognito')->post('/mfa/verify', [App\Http\Controllers\WebMFAController::class, 'actionVerifyMFA'])->name('cognito.action.mfa.verify');
 
-Route::middleware('aws-cognito')->any('logout', function (\Illuminate\Http\Request $request) { 
+Route::middleware('aws-cognito')->any('logout', function (\Illuminate\Http\Request $request) {
     Auth::guard()->logout();
     return redirect('/');
 })->name('logout');
-Route::middleware('aws-cognito')->any('logout/forced', function (\Illuminate\Http\Request $request) { 
+Route::middleware('aws-cognito')->any('logout/forced', function (\Illuminate\Http\Request $request) {
     Auth::guard()->logout(true);
     return redirect('/');
 })->name('logout_forced');
