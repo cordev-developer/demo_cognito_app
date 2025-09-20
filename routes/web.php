@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,9 +32,12 @@ Route::get('/hello', function () {
  */
 
 Route::get('/login', function () { return view('auth.login'); })->name('login');
+Route::post('/login', [LoginController::class, 'login']);
 Route::get('/login/mfa', function () { return view('auth.login_mfa_code'); })->name('cognito.form.mfa.code');
 Route::post('/login/mfa', [App\Http\Controllers\WebMFAController::class, 'actionValidateMFA'])->name('cognito.form.mfa.code');
 Route::get('/register', function () { return view('auth.register'); })->name('register');
+#Route::post('register', [RegisterController::class, 'register']);
+Route::post('/register', [UserController::class, 'webRegister'])->name('register');
 Route::get('/password/forgot', function () { return view('auth.passwords.email'); })->name('password.request');
 Route::get('/password/reset', function () { return view('auth.passwords.reset'); })->name('cognito.form.reset.password.code');
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use Auth;
+use Ellaisys\Cognito\AwsCognitoClient;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -10,10 +11,12 @@ use App\Models\User;
 use Ellaisys\Cognito\Auth\RegistersUsers;
 use Ellaisys\Cognito\Auth\SendsPasswordResetEmails;
 use Ellaisys\Cognito\Auth\ResetsPasswords;
+use Illuminate\Support\Collection;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 
 use Illuminate\Routing\Controller as BaseController;
 
@@ -27,6 +30,7 @@ class UserController extends BaseController
     use SendsPasswordResetEmails;
     use ResetsPasswords;
 
+    /*
     public function webRegister(Request $request)
     {
         $cognitoRegistered=false;
@@ -63,6 +67,116 @@ class UserController extends BaseController
             ->withErrors(['email' => 'The email has already been taken.']);
         } //End if
     } //Function ends
+    */
+
+    public function webRegister(Request $request)
+    {
+        $cognitoRegistered = false;
+
+        // 1. Validate input fields
+        $validator = $request->validate([
+            'name'                  => 'required|string|max:50',
+            'email'                 => 'required|string|email|max:64|unique:users',
+            'phone'                 => 'required|string|min:8|max:20',
+            'password'              => 'required|string|min:8|max:64|confirmed',
+            'password_confirmation' => 'required|string|min:8|max:64',
+        ]);
+
+        // 2. Prepare user data for local database
+        $data['username'] = $request->get('name');
+        $data['email'] = $request->get('email');
+        $data['phone_number'] = $request->get('phone');
+        $data['password'] = bcrypt($request->get('password'));
+
+
+        // 🚨 Do NOT save the raw password locally
+        // If you want to store users in the DB, make sure to hash it first:
+        // $data['password'] = bcrypt($request->password);
+
+        // 3. Create a Collection for Cognito registration
+        $collection = collect($data);
+
+
+        Log::info('User registration data received', $collection->toArray());
+
+        // 4. Try to register user in AWS Cognito
+        $cognitoRegistered = $this->createUser($collection);
+
+        if ($cognitoRegistered) {
+            // Save user locally (only if needed for your app)
+            unset($data['password']);
+            unset($data['username']);
+            unset($data['phone_number']);
+            $data['name'] = $request->get('name');
+            User::create($data);
+
+            //Send to login page
+            return view('auth.login');
+
+
+            // Redirect to login page with success message
+            //return redirect()->route('login')->with('status', 'success')->with('message', 'User registered successfully. Please verify your email or phone number to activate your account.');
+        } else {
+            // If Cognito fails (e.g., duplicate email or username)
+            return redirect()->back()
+                ->withInput()
+                ->with('status', 'error')
+                ->with('message', 'The user already exists in Cognito')
+                ->withErrors(['email' => 'The email is already taken.']);
+        }
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Support\Collection  $request
+     * @return \Illuminate\Http\Response
+     * @throws InvalidUserFieldException
+     */
+    public function createUser(Collection $request, array $clientMetadata=null, string $groupname=null)
+    {
+        //Initialize Cognito Attribute array
+        $attributes = [];
+
+        //Get the configuration for new user invitation message action.
+        $messageAction = config('cognito.new_user_message_action', null);
+
+        //Get the registeration fields
+        $userFields = config('cognito.cognito_user_fields');
+
+        //Iterate the fields
+        foreach ($userFields as $key => $userField) {
+            if ($userField!=null) {
+                if ($request->has($userField)) {
+                    $attributes[$key] = $request->get($userField);
+                } else {
+                    Log::error('RegistersUsers:createCognitoUser:InvalidUserFieldException');
+                    Log::error("The configured user field {$userField} is not provided in the request.");
+                    throw new InvalidUserFieldException("The configured user field {$userField} is not provided in the request.");
+                } //End if
+            } //End if
+        } //Loop ends
+
+        //Register the user in Cognito
+        $userKey = $request->has('username')?'username':'email';
+
+        //Password parameter
+        $password = null;
+        if (config('cognito.force_new_user_password', true)) {
+            $password = $request->has($this->paramPassword)?$request[$this->paramPassword]:null;
+        }// End if
+
+        return app()->make(AwsCognitoClient::class)->register(
+            $request['username'], $password, $attributes
+        );
+
+//        return app()->make(AwsCognitoClient::class)->inviteUser(
+//            $request[$userKey], $password, $attributes,
+//            $clientMetadata, $messageAction,
+//            $groupname
+//        );
+    } //Function ends
+
 
 
     public function sendPasswordResetEmail(Request $request)

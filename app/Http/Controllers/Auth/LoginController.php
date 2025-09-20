@@ -44,9 +44,9 @@ class LoginController extends Controller
 
     /**
      * Authenticate User
-     * 
+     *
      * @throws \HttpException
-     * 
+     *
      * @return mixed
      */
     public function login(\Illuminate\Http\Request $request)
@@ -61,7 +61,7 @@ class LoginController extends Controller
                     $request->session()->regenerate();
 
                     return redirect(route('home'));
-    
+
                        // ->intended('home');
                 } else if ($response===false) {
                     return redirect()
