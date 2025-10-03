@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\User;
 
-use Auth;
 use Ellaisys\Cognito\AwsCognitoClient;
+use Ellaisys\Cognito\Exceptions\InvalidUserFieldException;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -83,18 +83,21 @@ class UserController extends BaseController
         ]);
 
         // 2. Prepare user data for local database
-        $data['username'] = $request->get('name');
+        $data['name'] = $request->get('name');
         $data['email'] = $request->get('email');
         $data['phone_number'] = $request->get('phone');
-        $data['password'] = bcrypt($request->get('password'));
+//        $data['password'] = bcrypt($request->get('password'));
+        //$data['password'] = $request->get('password');
+
 
 
         // 🚨 Do NOT save the raw password locally
         // If you want to store users in the DB, make sure to hash it first:
-        // $data['password'] = bcrypt($request->password);
+        $data['password'] = bcrypt($request->password);
 
         // 3. Create a Collection for Cognito registration
         $collection = collect($data);
+        $collection['password'] = $request->get('password');
 
 
         Log::info('User registration data received', $collection->toArray());
@@ -105,9 +108,24 @@ class UserController extends BaseController
         if ($cognitoRegistered) {
             // Save user locally (only if needed for your app)
             unset($data['password']);
-            unset($data['username']);
+            //unset($data['username']);
             unset($data['phone_number']);
             $data['name'] = $request->get('name');
+
+
+            // Supongamos que $cognitoRegistered contiene la respuesta de Cognito
+            if (isset($cognitoRegistered['UserAttributes'])) {
+                foreach ($cognitoRegistered['UserAttributes'] as $attribute) {
+                    if ($attribute['Name'] == 'sub') {
+                        $data['sub'] = $attribute['Value']; // aquí tienes el valor del atributo
+
+                        // Ejemplo: mostrar en log
+                        //\Log::info("Atributo: $name => $value");
+                    }
+                }
+            }
+
+            //$data['sub'] = 123456;
             User::create($data);
 
             //Send to login page
@@ -141,7 +159,7 @@ class UserController extends BaseController
         //Get the configuration for new user invitation message action.
         $messageAction = config('cognito.new_user_message_action', null);
 
-        //Get the registeration fields
+        //Get the registration fields
         $userFields = config('cognito.cognito_user_fields');
 
         //Iterate the fields
@@ -166,9 +184,12 @@ class UserController extends BaseController
             $password = $request->has($this->paramPassword)?$request[$this->paramPassword]:null;
         }// End if
 
-        return app()->make(AwsCognitoClient::class)->register(
-            $request['username'], $password, $attributes
+        app()->make(AwsCognitoClient::class)->register(
+            //$request[$userKey], $password, $attributes
+            $request->get('name'), $password, $attributes
         );
+
+        return app()->make(AwsCognitoClient::class)->getUser($request['name']);
 
 //        return app()->make(AwsCognitoClient::class)->inviteUser(
 //            $request[$userKey], $password, $attributes,
@@ -176,7 +197,6 @@ class UserController extends BaseController
 //            $groupname
 //        );
     } //Function ends
-
 
 
     public function sendPasswordResetEmail(Request $request)

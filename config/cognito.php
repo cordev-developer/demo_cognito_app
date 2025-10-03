@@ -33,9 +33,17 @@ return [
         'locale' => null
     ],*/
     'cognito_user_fields'   => [
-        'username' => 'username',
+        //'name' => 'name',
         'email' => 'email', //Do Not set this parameter to null
         'phone_number' => 'phone_number',
+        'given_name' => null,
+        'middle_name' => null,
+        'family_name' => null,
+        'nickname' => null,
+        'preferred_username' => null,
+        'gender' => null,
+        'birthdate' => null,
+        'locale' => null
     ],
 
 
@@ -49,7 +57,7 @@ return [
     | in the local DB Model that maps with Cognito user subject UUID.
     |
     */
-    'user_subject_uuid' => env('AWS_COGNITO_USER_SUBJECT_UUID', 'sub'),
+    //'user_subject_uuid' => env('AWS_COGNITO_USER_SUBJECT_UUID', 'sub'),
 
     /*
     |--------------------------------------------------------------------------
