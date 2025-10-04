@@ -119,18 +119,15 @@ class UserController extends BaseController
                     if ($attribute['Name'] == 'sub') {
                         $data['sub'] = $attribute['Value']; // aquí tienes el valor del atributo
 
-                        // Ejemplo: mostrar en log
-                        //\Log::info("Atributo: $name => $value");
                     }
                 }
             }
 
-            //$data['sub'] = 123456;
+            // Register user in DB
             User::create($data);
 
             //Send to login page
             return view('auth.login');
-
 
             // Redirect to login page with success message
             //return redirect()->route('login')->with('status', 'success')->with('message', 'User registered successfully. Please verify your email or phone number to activate your account.');
@@ -181,8 +178,8 @@ class UserController extends BaseController
         //Password parameter
         $password = null;
         if (config('cognito.force_new_user_password', true)) {
-            $password = $request->has($this->paramPassword)?$request[$this->paramPassword]:null;
-        }// End if
+            $password = $request->has($this->paramPassword) ? $request[$this->paramPassword] : null;
+        }
 
         app()->make(AwsCognitoClient::class)->register(
             //$request[$userKey], $password, $attributes

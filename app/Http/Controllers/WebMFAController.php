@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
 
 use Ellaisys\Cognito\AwsCognitoClaim;
@@ -28,140 +30,176 @@ class WebMFAController extends BaseController
     use AuthenticatesUsers;
     use RegisterMFA;
 
-	/**
-	 * Action to activate MFA for the 
-	 */
+    /**
+     * Action to activate MFA for the
+     */
     public function actionActivateMFA()
     {
-		try
-		{
+        try
+        {
             $user = auth()->guard('web')->user();
             $response = $this->activateMFA();
             $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
 
+            $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
+
             //Return status to screen
+//            return back()
+//                ->with('user', $userCognito->toArray())
+//                ->with('actionActivateMFA', $response);
             return back()
                 ->with('user', $userCognito->toArray())
-                ->with('actionActivateMFA', $response);
+                ->with('actionMFA', [
+                    'status' => $status,
+                    'message' => $status ? 'MFA activado correctamente' : 'No se pudo activar el MFA'
+                ]);
 
         } catch(Exception $e) {
-			$message = 'Error activating the MFA.';
-			if ($e instanceof ValidationException) {
+            $message = 'Error activating the MFA.';
+            if ($e instanceof ValidationException) {
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
-				$message = $e->getAwsErrorMessage();
-			} else {
+                $message = $e->getAwsErrorMessage();
+            } else {
                 //Do nothing
             } //End if
 
-			throw $e;
+            throw $e;
         } //Try-catch ends
     } //Function ends
 
 
-	/**
-	 * Action to deactivate MFA for the 
-	 */
+    /**
+     * Action to deactivate MFA for the
+     */
     public function actionDeactivateMFA()
     {
-		try
-		{
+        try
+        {
             $user = auth()->guard('web')->user();
             $response = $this->deactivateMFA();
             $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
 
+            $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
+
             //Return status to screen
+//            return back()
+//                ->with('user', $userCognito->toArray())
+//                ->with('actionDeactivateMFA', $response);
+
             return back()
                 ->with('user', $userCognito->toArray())
-                ->with('actionDeactivateMFA', $response);
+                ->with('actionMFA', [
+                    'status' => $status,
+                    'message' => $status ? 'MFA deshabilitado correctamente' : 'No se pudo deshabilitar el MFA'
+                ]);
         } catch(Exception $e) {
-			$message = 'Error activating the MFA.';
-			if ($e instanceof ValidationException) {
+            $message = 'Error activating the MFA.';
+            if ($e instanceof ValidationException) {
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
-				$message = $e->getAwsErrorMessage();
-			} else {
+                $message = $e->getAwsErrorMessage();
+            } else {
                 //Do nothing
             } //End if
 
-			throw $e;
+            throw $e;
         } //Try-catch ends
     } //Function ends
 
 
-	/**
-	 * Action to enable MFA for the user
-	 */
+    /**
+     * Action to enable MFA for the user
+     */
     public function actionEnableMFA()
     {
-		try
-		{
+        try
+        {
             $user = auth()->guard('web')->user();
             $response = $this->enableMFA('web', $user->email);
             $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
 
+            $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
+
             //Return status to screen
+//            return back()
+//                ->with('user', $userCognito->toArray())
+//                ->with('actionEnableMFA', [
+//                    'message' => $response
+//                ]);
             return back()
                 ->with('user', $userCognito->toArray())
-                ->with('actionEnableMFA', [
-                    'message' => $response
+                ->with('actionMFA', [
+                    'status' => $status,
+                    'message' => $status ? 'MFA activado correctamente' : 'No se pudo activar el MFA',
+                    'type' => 'activate'  // <-- añadimos tipo
                 ]);
         } catch(Exception $e) {
-			$message = 'Error activating the MFA.';
-			if ($e instanceof ValidationException) {
+            $message = 'Error activating the MFA.';
+            if ($e instanceof ValidationException) {
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
-				$message = $e->getAwsErrorMessage();
-			} else {
+                $message = $e->getAwsErrorMessage();
+            } else {
                 //Do nothing
             } //End if
 
-			throw $e;
+            throw $e;
         } //Try-catch ends
     } //Function ends
 
 
-	/**
-	 * Action to disable MFA for the user
-	 */
+    /**
+     * Action to disable MFA for the user
+     */
     public function actionDisableMFA()
     {
-		try
-		{
+        try
+        {
             $user = auth()->guard('web')->user();
             $response = $this->disableMFA('web', $user->email);
             $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
 
+            $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
+
             //Return status to screen
+//            return back()
+//                ->with('user', $userCognito->toArray())
+//                ->with('actionDisableMFA', [
+//                    'status' => $response['@metadata']['statusCode']==200
+//                ]);
             return back()
                 ->with('user', $userCognito->toArray())
-                ->with('actionDisableMFA', [
-                    'status' => $response['@metadata']['statusCode']==200
+                ->with('actionMFA', [
+                    'status' => $status,
+                    'message' => $status ? 'MFA desactivado correctamente' : 'No se pudo desactivar el MFA',
+                    'type' => 'deactivate'  // <-- añadimos tipo
                 ]);
+
         } catch(Exception $e) {
-			$message = 'Error activating the MFA.';
-			if ($e instanceof ValidationException) {
+            $message = 'Error activating the MFA.';
+            if ($e instanceof ValidationException) {
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
-				$message = $e->getAwsErrorMessage();
-			} else {
+                $message = $e->getAwsErrorMessage();
+            } else {
                 //Do nothing
             } //End if
 
-			throw $e;
+            throw $e;
         } //Try-catch ends
     } //Function ends
 
 
-	/**
-	 * Verify the MFA user code
-	 * 
-	 * @param  \Illuminate\Http\Request  $request
-	 */
+    /**
+     * Verify the MFA user code
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
     public function actionVerifyMFA(Request $request)
     {
-		try
-		{
+        try
+        {
             $code = $request['code'];
             $deviceName = $request['device_name'];
 
@@ -176,16 +214,16 @@ class WebMFAController extends BaseController
                     'status' => true
                 ]);
         } catch(Exception $e) {
-			$message = 'Error activating the MFA.';
-			if ($e instanceof ValidationException) {
+            $message = 'Error activating the MFA.';
+            if ($e instanceof ValidationException) {
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
-				$message = $e->getAwsErrorMessage();
-			} else {
+                $message = $e->getAwsErrorMessage();
+            } else {
                 $message = $e->getMessage();
             } //End if
 
-			return back()
+            return back()
                 ->with('actionVerifyMFA', $message);
         } //Try-catch ends
     } //Function ends

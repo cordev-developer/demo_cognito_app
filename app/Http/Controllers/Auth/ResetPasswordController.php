@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
+use Ellaisys\Cognito\Auth\ResetsPasswords;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
-//use Illuminate\Foundation\Auth\ResetsPasswords; //Removed for AWS Cognito
-use Ellaisys\Cognito\Auth\ResetsPasswords; //Added for AWS Cognito
 
 
 class ResetPasswordController extends Controller
@@ -30,5 +30,36 @@ class ResetPasswordController extends Controller
      * @var string
      */
 
-    protected $redirectTo = RouteServiceProvider::HOME;
+
+    protected string $redirectTo = '/login';
+
+
+    /**
+     * Handle a successful password reset response.
+     *
+     * @param Request $request
+     * @param  string  $response
+     * @return RedirectResponse
+     */
+    protected function sendResetResponse(Request $request, $response): RedirectResponse
+    {
+        // ✅ Send successfully message to login page
+        return redirect($this->redirectPath())
+            ->with('status', __('Your password has been reset successfully.'));
+    }
+
+    /**
+     * Handle a failed password reset response.
+     *
+     * @param Request $request
+     * @param  string  $response
+     * @return RedirectResponse
+     */
+    protected function sendResetFailedResponse(Request $request, $response): RedirectResponse
+    {
+        // ✅ Send error message
+        return redirect()->back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => __('Failed to reset password: ') . $response]);
+    }
 }

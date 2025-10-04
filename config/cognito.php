@@ -33,7 +33,6 @@ return [
         'locale' => null
     ],*/
     'cognito_user_fields'   => [
-        //'name' => 'name',
         'email' => 'email', //Do Not set this parameter to null
         'phone_number' => 'phone_number',
         'given_name' => null,

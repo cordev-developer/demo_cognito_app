@@ -1,9 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+
+
+    <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
+
+{{--            @if (session('actionMFA'))--}}
+{{--                <div class="alert alert-{{ session('actionMFA.status') ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">--}}
+{{--                    {{ session('actionMFA.message') }}--}}
+{{--                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>--}}
+{{--                </div>--}}
+{{--            @endif--}}
+            @if (session('actionMFA'))
+                @php
+                    $type = session('actionMFA.type');
+                    $alertClass = $type === 'activate' ? 'success' : ($type === 'deactivate' ? 'warning' : 'info');
+                @endphp
+                <div class="alert alert-{{ $alertClass }} alert-dismissible fade show" role="alert">
+                    {{ session('actionMFA.message') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="card">
                 <div class="card-header">{{ __('Dashboard') }}</div>
 
@@ -14,12 +34,13 @@
                         </div>
                     @endif
 
-                    <img src="https://github.com/ellaisys/aws-cognito/raw/master/assets/images/banner.png" 
-                        width="100%" alt="EllaiSys AWS Cloud Capability"/>
+                    <img src="{{ asset('images/Mi_foto_200px.jpg') }}"
+                             width="20%" alt="Home photo"/>
+
 
                     <h2><strong>Welcome: {{ __('You are logged in!') }}</strong></h2>
                     <h4>This is a demo application, that uses the Laravel Package to manage Web and API authentication with AWS Cognito</h4>
-                
+
                     </br>
                     <h2><strong>Session Parameters:</strong></h2>
                     @if ($sessionData = session()->all())
@@ -83,7 +104,7 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
                             <button type="submit" class="btn btn-primary">Verify</button>
                         </div>
-                    </div>                    
+                    </div>
                 </form>
             </div>
         </div>
@@ -93,4 +114,6 @@
             modalMFAActivate.show();
         </script>
     @endif
+
+
 @endsection
