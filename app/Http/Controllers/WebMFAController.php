@@ -2,28 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
+//use Auth;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
 
-use Ellaisys\Cognito\AwsCognitoClaim;
 use Ellaisys\Cognito\Auth\AuthenticatesUsers;
 use Ellaisys\Cognito\Auth\RegisterMFA;
-
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Support\Facades\Validator;
-
 use Illuminate\Routing\Controller as BaseController;
 
 use Exception;
-use Ellaisys\Cognito\Exceptions\AwsCognitoException;
-use Ellaisys\Cognito\Exceptions\NoLocalUserException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+
 
 class WebMFAController extends BaseController
 {
@@ -44,14 +34,13 @@ class WebMFAController extends BaseController
             $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
 
             //Return status to screen
-//            return back()
-//                ->with('user', $userCognito->toArray())
-//                ->with('actionActivateMFA', $response);
             return back()
                 ->with('user', $userCognito->toArray())
-                ->with('actionMFA', [
+                ->with('actionSmsMFA', [
                     'status' => $status,
-                    'message' => $status ? 'MFA activado correctamente' : 'No se pudo activar el MFA'
+                    'message' => 'MFA Google activado correctamente',
+                    'type' => 'activate',  // <-- Add type
+                    'response' => $response
                 ]);
 
         } catch(Exception $e) {
@@ -80,19 +69,14 @@ class WebMFAController extends BaseController
             $response = $this->deactivateMFA();
             $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
 
-            $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
-
             //Return status to screen
-//            return back()
-//                ->with('user', $userCognito->toArray())
-//                ->with('actionDeactivateMFA', $response);
-
             return back()
                 ->with('user', $userCognito->toArray())
-                ->with('actionMFA', [
-                    'status' => $status,
-                    'message' => $status ? 'MFA deshabilitado correctamente' : 'No se pudo deshabilitar el MFA'
+                ->with('actionSmsMFA', [
+                    'message' => 'MFA Google desactivado correctamente',
+                    'type' => 'deactivate'  // <-- Add type
                 ]);
+
         } catch(Exception $e) {
             $message = 'Error activating the MFA.';
             if ($e instanceof ValidationException) {
@@ -122,17 +106,13 @@ class WebMFAController extends BaseController
             $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
 
             //Return status to screen
-//            return back()
-//                ->with('user', $userCognito->toArray())
-//                ->with('actionEnableMFA', [
-//                    'message' => $response
-//                ]);
             return back()
                 ->with('user', $userCognito->toArray())
                 ->with('actionMFA', [
                     'status' => $status,
-                    'message' => $status ? 'MFA activado correctamente' : 'No se pudo activar el MFA',
-                    'type' => 'activate'  // <-- añadimos tipo
+                    'message' => 'MFA activado correctamente',
+                    //'message' => $response,
+                    'type' => 'activate'  // <-- Add type
                 ]);
         } catch(Exception $e) {
             $message = 'Error activating the MFA.';
@@ -163,17 +143,12 @@ class WebMFAController extends BaseController
             $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
 
             //Return status to screen
-//            return back()
-//                ->with('user', $userCognito->toArray())
-//                ->with('actionDisableMFA', [
-//                    'status' => $response['@metadata']['statusCode']==200
-//                ]);
             return back()
                 ->with('user', $userCognito->toArray())
                 ->with('actionMFA', [
                     'status' => $status,
-                    'message' => $status ? 'MFA desactivado correctamente' : 'No se pudo desactivar el MFA',
-                    'type' => 'deactivate'  // <-- añadimos tipo
+                    'message' => 'MFA desactivado correctamente',
+                    'type' => 'deactivate'  // <-- Add type
                 ]);
 
         } catch(Exception $e) {

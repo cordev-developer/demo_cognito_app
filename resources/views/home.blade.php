@@ -7,12 +7,6 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-{{--            @if (session('actionMFA'))--}}
-{{--                <div class="alert alert-{{ session('actionMFA.status') ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">--}}
-{{--                    {{ session('actionMFA.message') }}--}}
-{{--                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>--}}
-{{--                </div>--}}
-{{--            @endif--}}
             @if (session('actionMFA'))
                 @php
                     $type = session('actionMFA.type');
@@ -20,6 +14,17 @@
                 @endphp
                 <div class="alert alert-{{ $alertClass }} alert-dismissible fade show" role="alert">
                     {{ session('actionMFA.message') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('actionSmsMFA'))
+                @php
+                    $type = session('actionSmsMFA.type');
+                    $alertClass = $type === 'activate' ? 'success' : ($type === 'deactivate' ? 'warning' : 'info');
+                @endphp
+                <div class="alert alert-{{ $alertClass }} alert-dismissible fade show" role="alert">
+                    {{ session('actionSmsMFA.message') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
@@ -34,7 +39,7 @@
                         </div>
                     @endif
 
-                    <img src="{{ asset('images/Mi_foto_200px.jpg') }}"
+                    <img src="{{ asset('images/new-php-logo.png') }}"
                              width="20%" alt="Home photo"/>
 
 
@@ -67,7 +72,7 @@
     </div>
 </div>
 
-    @if ($actionActivateMFA = session()->get('actionActivateMFA'))
+    @if ($actionActivateMFA = session('actionSmsMFA.response'))
         <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" id="modalMFAActivate" aria-labelledby="modalMFAActivate" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <form name="verify-mfa-code-form" id="verify-mfa-code-form" method="post" action="{{route('cognito.action.mfa.verify')}}" autocomplete="off">

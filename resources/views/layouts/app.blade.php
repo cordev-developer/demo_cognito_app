@@ -63,14 +63,18 @@
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('cognito.action.mfa.activate') }}" data-toggle="modal" data-target="#modalMFAActivate">
-                                        {{ __('Activate MFA') }}
+                                        {{ __('Enable TOTP MFA') }}
                                     </a>
+                                    <a class="dropdown-item" href="{{ route('cognito.action.mfa.deactivate') }}" data-toggle="modal" data-target="#modalMFAActivate">
+                                        {{ __('Disable TOTP MFA') }}
+                                    </a>
+                                    <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('cognito.action.mfa.enable') }}">
-                                        {{ __('Enable MFA') }}
+                                        {{ __('Enable SMS MFA') }}
                                     </a>
 
                                     <a class="dropdown-item" href="{{ route('cognito.action.mfa.disable') }}">
-                                        {{ __('Disable MFA') }}
+                                        {{ __('Disable SMS MFA') }}
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
