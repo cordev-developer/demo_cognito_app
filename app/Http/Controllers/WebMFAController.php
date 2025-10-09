@@ -21,7 +21,7 @@ class WebMFAController extends BaseController
     use RegisterMFA;
 
     /**
-     * Action to activate MFA for the
+     * Action to activate Google Authenticator MFA
      */
     public function actionActivateMFA()
     {
@@ -59,7 +59,7 @@ class WebMFAController extends BaseController
 
 
     /**
-     * Action to deactivate MFA for the
+     * Action to deactivate MFA Google Authenticator
      */
     public function actionDeactivateMFA()
     {
@@ -93,7 +93,7 @@ class WebMFAController extends BaseController
 
 
     /**
-     * Action to enable MFA for the user
+     * Action to enable SMS MFA
      */
     public function actionEnableMFA()
     {
@@ -130,7 +130,7 @@ class WebMFAController extends BaseController
 
 
     /**
-     * Action to disable MFA for the user
+     * Action to disable SMS MFA
      */
     public function actionDisableMFA()
     {

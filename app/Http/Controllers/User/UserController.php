@@ -77,7 +77,7 @@ class UserController extends BaseController
         $validator = $request->validate([
             'name'                  => 'required|string|max:50',
             'email'                 => 'required|string|email|max:64|unique:users',
-            'phone'                 => 'required|string|min:8|max:20',
+//            'phone'                 => 'required|string|min:8|max:20',
             'password'              => 'required|string|min:8|max:64|confirmed',
             'password_confirmation' => 'required|string|min:8|max:64',
         ]);
@@ -85,15 +85,12 @@ class UserController extends BaseController
         // 2. Prepare user data for local database
         $data['name'] = $request->get('name');
         $data['email'] = $request->get('email');
-        $data['phone_number'] = $request->get('phone');
-//        $data['password'] = bcrypt($request->get('password'));
-        //$data['password'] = $request->get('password');
-
+//        $data['phone_number'] = $request->get('phone');
 
 
         // 🚨 Do NOT save the raw password locally
         // If you want to store users in the DB, make sure to hash it first:
-        $data['password'] = bcrypt($request->password);
+        $data['password'] = bcrypt($request->get('password'));
 
         // 3. Create a Collection for Cognito registration
         $collection = collect($data);
@@ -108,16 +105,16 @@ class UserController extends BaseController
         if ($cognitoRegistered) {
             // Save user locally (only if needed for your app)
             unset($data['password']);
-            //unset($data['username']);
-            unset($data['phone_number']);
+//            unset($data['phone_number']);
+            //unset($data['password']);
             $data['name'] = $request->get('name');
 
 
-            // Supongamos que $cognitoRegistered contiene la respuesta de Cognito
+            // Check the user 'sub' attribute
             if (isset($cognitoRegistered['UserAttributes'])) {
                 foreach ($cognitoRegistered['UserAttributes'] as $attribute) {
                     if ($attribute['Name'] == 'sub') {
-                        $data['sub'] = $attribute['Value']; // aquí tienes el valor del atributo
+                        $data['sub'] = $attribute['Value']; // Assign the value to $data['sub']
 
                     }
                 }
@@ -181,18 +178,19 @@ class UserController extends BaseController
             $password = $request->has($this->paramPassword) ? $request[$this->paramPassword] : null;
         }
 
-        app()->make(AwsCognitoClient::class)->register(
-            //$request[$userKey], $password, $attributes
-            $request->get('name'), $password, $attributes
+//        app()->make(AwsCognitoClient::class)->register(
+//            //$request[$userKey], $password, $attributes
+//            $request->get('name'), $password, $attributes
+//        );
+
+        app()->make(AwsCognitoClient::class)->inviteUser(
+            $request->get('name'), $password, $attributes,
+            $clientMetadata, $messageAction,
+            $groupname
         );
 
         return app()->make(AwsCognitoClient::class)->getUser($request['name']);
 
-//        return app()->make(AwsCognitoClient::class)->inviteUser(
-//            $request[$userKey], $password, $attributes,
-//            $clientMetadata, $messageAction,
-//            $groupname
-//        );
     } //Function ends
 
 

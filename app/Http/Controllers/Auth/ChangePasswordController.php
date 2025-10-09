@@ -47,13 +47,13 @@ class ChangePasswordController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+//        $this->middleware('auth');
     }
 
 
 	/**
 	 * Action to update the user password
-	 * 
+	 *
 	 * @param  \Illuminate\Http\Request  $request
 	 */
     public function actionChangePassword(Request $request)

@@ -52,11 +52,14 @@ class LoginController extends Controller
      */
     public function login(\Illuminate\Http\Request $request)
     {
+        $response = null;
+
         try {
             //Convert request to collection
             $collection = collect($request->all());
 
             //Authenticate with Cognito Package Trait (with 'web' as the auth guard)
+
             if ($response = $this->attemptLogin($collection, 'web')) {
                 if ($response===true) {
                     $request->session()->regenerate();
@@ -81,8 +84,9 @@ class LoginController extends Controller
             } //End if
         } catch(Exception $e) {
             Log::error($e->getMessage());
-            return $response->back()
-                ->withInput($request)
+            return redirect()
+                ->back()
+                ->withInput($request->only('username', 'remember'))
                 ->withErrors(['error' => $e->getMessage()]);
         } //Try-catch ends
 

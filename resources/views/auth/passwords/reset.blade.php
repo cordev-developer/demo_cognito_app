@@ -11,34 +11,34 @@
                     <form method="POST" action="{{ route('password.update') }}">
                         @csrf
 
-                        @if(request()->has('code'))
-                            <input type="hidden" name="code" value="{{ request()->get('code') }}" />
-                        @elseif(request()->has('token'))
-                            <input type="hidden" name="token" value="{{ request()->get('token') }}" />
-                        @else
-                            <div class="row mb-3">
-                                <label for="token" class="col-md-4 col-form-label text-md-end">{{ __('Token') }}</label>
+{{--                        @if(request()->has('code'))--}}
+{{--                            <input type="hidden" name="code" value="{{ request()->get('code') }}" />--}}
+{{--                        @elseif(request()->has('token'))--}}
+{{--                            <input type="hidden" name="token" value="{{ request()->get('token') }}" />--}}
+{{--                        @else--}}
+{{--                            <div class="row mb-3">--}}
+{{--                                <label for="token" class="col-md-4 col-form-label text-md-end">{{ __('Token') }}</label>--}}
 
-                                <div class="col-md-6">
-                                    <input id="token" type="text" class="form-control @error('token') is-invalid @enderror" name="token" 
-                                        value="{{ request()->has('token') ? request()->get('token') : old('token') }}"  
-                                        autocomplete="token" {{ request()->has('token') ? 'disabled' : 'required autofocus' }}/>
+{{--                                <div class="col-md-6">--}}
+{{--                                    <input id="token" type="text" class="form-control @error('token') is-invalid @enderror" name="token"--}}
+{{--                                        value="{{ request()->has('token') ? request()->get('token') : old('token') }}"--}}
+{{--                                        autocomplete="token" {{ request()->has('token') ? 'disabled' : 'required autofocus' }}/>--}}
 
-                                    @error('token')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-                        @endif
+{{--                                    @error('token')--}}
+{{--                                        <span class="invalid-feedback" role="alert">--}}
+{{--                                            <strong>{{ $message }}</strong>--}}
+{{--                                        </span>--}}
+{{--                                    @enderror--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        @endif--}}
 
                         <div class="row mb-3">
                             <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('E-Mail Address') }}</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" 
-                                    value="{{ request()->has('email') ? request()->get('email') : old('email') }}"  
+                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email"
+                                    value="{{ request()->has('email') ? request()->get('email') : old('email') }}"
                                     autocomplete="email" {{ request()->has('email') ? 'disabled' : 'required autofocus' }}/>
 
                                 @error('email')
