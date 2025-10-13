@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Ellaisys\Cognito\AwsCognitoClient;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
@@ -58,18 +59,23 @@ class ChangePasswordController extends Controller
 	 */
     public function actionChangePassword(Request $request)
     {
+        if(session()->has('force_email')) {
+            session()->forget('force_email');
+        }
+
 		try
 		{
             //Validate request
             $validator = Validator::make($request->all(), [
-                'email'    => 'required|email',
+                'email'    => 'required',
                 'password'  => 'required',
                 'new_password' => 'required|confirmed',
             ]);
             $validator->validate();
 
-            // Get Current User
-            $userCurrent = auth()->guard('web')->user();
+//            $response = app()->make(AwsCognitoClient::class)->getUser($request['email']);
+
+//            dd($request->all());
 
             //Check the password
             if ($this->reset($request)) {

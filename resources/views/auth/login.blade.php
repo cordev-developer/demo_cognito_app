@@ -37,10 +37,12 @@
                         @csrf
 
                         <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('E-Mail Address') }}</label>
+                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Username or E-Mail') }}</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="text" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+{{--                                <input id="email" type="text" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>--}}
+                                <input id="email" type="text" class="form-control @error('email') is-invalid @enderror" name="email" value="jcorralf" required autocomplete="email" autofocus>
+
 
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
@@ -54,7 +56,9 @@
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
 
                             <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" autocomplete="current-password">
+{{--                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" autocomplete="current-password">--}}
+                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" value="Dcorralf_1975@" autocomplete="current-password">
+
 
                                 @error('password')
                                     <span class="invalid-feedback" role="alert">

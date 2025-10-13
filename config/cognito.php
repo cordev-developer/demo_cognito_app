@@ -34,8 +34,8 @@ return [
     ],*/
     'cognito_user_fields'   => [
         'email' => 'email', //Do Not set this parameter to null
-//        'phone_number' => 'phone_number',
-        'phone_number' => null,
+        'phone_number' => 'phone_number',
+//        'phone_number' => null,
         'given_name' => null,
         'middle_name' => null,
         'family_name' => null,
@@ -57,7 +57,7 @@ return [
     | in the local DB Model that maps with Cognito user subject UUID.
     |
     */
-    #'user_subject_uuid' => env('AWS_COGNITO_USER_SUBJECT_UUID', 'sub'),
+    'user_subject_uuid' => env('AWS_COGNITO_USER_SUBJECT_UUID', 'sub'),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,10 +69,25 @@ return [
     | value is set to null.
     |
     */
-//    'new_user_message_action' => env('AWS_COGNITO_NEW_USER_MESSAGE_ACTION', null),
-//
-//    'force_password_change_web' => env('AWS_COGNITO_FORCE_PASSWORD_CHANGE_WEB', true),
-//    'force_redirect_route_name' => env('AWS_COGNITO_FORCE_PASSWORD_ROUTE_NAME', 'cognito.form.change.password'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Allow new user to set the password and have verified
+    |--------------------------------------------------------------------------
+    |
+    | This option enables the user to set the password and have that verified
+    | during the to invitation for the new user. The default value is set to true.
+    |
+    */
+    'force_new_user_password' => env('AWS_COGNITO_FORCE_NEW_USER_PASSWORD', false),
+
+
+    'new_user_message_action' => env('AWS_COGNITO_NEW_USER_MESSAGE_ACTION', null),
+
+    'force_password_change_web' => env('AWS_COGNITO_FORCE_PASSWORD_CHANGE_WEB', false),
+    'force_redirect_route_name' => env('AWS_COGNITO_FORCE_PASSWORD_ROUTE_NAME', 'cognito.form.change.password'),
+//    'force_redirect_route_name_2' => env('AWS_COGNITO_FORCE_PASSWORD_ROUTE_NAME_2', 'cognito.form.change.password_2'),
+//    'force_redirect_route_name_2' => 'cognito.form.change.password_2',
 
 
 ];

@@ -77,7 +77,7 @@ class UserController extends BaseController
         $validator = $request->validate([
             'name'                  => 'required|string|max:50',
             'email'                 => 'required|string|email|max:64|unique:users',
-//            'phone'                 => 'required|string|min:8|max:20',
+            'phone'                 => 'required|string|min:8|max:20',
             'password'              => 'required|string|min:8|max:64|confirmed',
             'password_confirmation' => 'required|string|min:8|max:64',
         ]);
@@ -85,7 +85,7 @@ class UserController extends BaseController
         // 2. Prepare user data for local database
         $data['name'] = $request->get('name');
         $data['email'] = $request->get('email');
-//        $data['phone_number'] = $request->get('phone');
+        $data['phone_number'] = $request->get('phone');
 
 
         // 🚨 Do NOT save the raw password locally

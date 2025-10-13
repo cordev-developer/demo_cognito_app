@@ -56,7 +56,9 @@ Route::post('password/confirm', [ConfirmPasswordController::class, 'confirm']);
  // Routes with middleware
 Route::middleware('aws-cognito')->get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::middleware('aws-cognito')->get('/password/change', function () { return view('auth.passwords.change'); })->name('cognito.form.change.password');
-Route::middleware('aws-cognito')->post('/password/change', [App\Http\Controllers\Auth\ChangePasswordController::class, 'actionChangePassword'])->name('cognito.action.change.password');
+Route::middleware('aws-cognito')->post('/password/change', [App\Http\Controllers\Auth\ChangePasswordController::class, 'actionChangePassword'])->name('cognito.form.change.password');
+//Route::post('/password/change', [App\Http\Controllers\Auth\ChangePasswordController::class, 'actionChangePassword'])->name('cognito.form.change.password_2');
+
 
 Route::middleware('aws-cognito')->get('/mfa/enable', [App\Http\Controllers\WebMFAController::class, 'actionEnableMFA'])->name('cognito.action.mfa.enable');
 Route::middleware('aws-cognito')->get('/mfa/disable', [App\Http\Controllers\WebMFAController::class, 'actionDisableMFA'])->name('cognito.action.mfa.disable');
