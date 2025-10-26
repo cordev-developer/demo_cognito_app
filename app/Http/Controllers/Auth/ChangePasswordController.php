@@ -2,21 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Ellaisys\Cognito\AwsCognitoClient;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
-
-use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
 use Ellaisys\Cognito\Auth\ChangePasswords as CognitoChangePasswords; //Added for AWS Cognito
-
 use Exception;
 use Illuminate\Validation\ValidationException;
-use Ellaisys\Cognito\Exceptions\AwsCognitoException;
-use Ellaisys\Cognito\Exceptions\NoLocalUserException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
 
 class ChangePasswordController extends Controller
@@ -48,7 +41,7 @@ class ChangePasswordController extends Controller
      */
     public function __construct()
     {
-//        $this->middleware('auth');
+        $this->middleware('auth');
     }
 
 
@@ -59,50 +52,63 @@ class ChangePasswordController extends Controller
 	 */
     public function actionChangePassword(Request $request)
     {
-        if(session()->has('force_email')) {
-            session()->forget('force_email');
-        }
 
 		try
 		{
-            //Validate request
+            // Validate request
             $validator = Validator::make($request->all(), [
-                'email'    => 'required',
-                'password'  => 'required',
-                'new_password' => 'required|confirmed',
+                'password' => 'required',
+                'new_password'  => 'required|confirmed',
+                'new_password_confirmation' => 'required',
             ]);
+
+
             $validator->validate();
 
-//            $response = app()->make(AwsCognitoClient::class)->getUser($request['email']);
+            $user = Auth::getUser();
+            if (!$user) {
+                throw new \Exception('User not authenticated.');
+            }
 
-//            dd($request->all());
+            $email = $user['email'];
+
+            $request->merge(['email' => $email]);
+
 
             //Check the password
             if ($this->reset($request)) {
+
                 //Logout on success
                 auth()->guard()->logout(true);
                 $request->session()->invalidate();
 
-                return redirect(route('login'))->with('success', true);
+                return redirect(route('login'))
+                    ->with('success', true);
             } else {
-				return redirect()->back()
-					->with('status', 'error')
-					->with('message', 'Password updated failed');
+//				return redirect()->back()
+//					->with('status', 'error')
+//					->with('message', 'Password updated failed');
+                return redirect(route('login'))
+                    ->with('status', 'error')
+                    ->with('message', 'There was a problem while resetting your password.');
 			} //End if
         } catch(Exception $e) {
-			$message = 'Error sending the reset mail.';
+			$message = 'There was a problem while resetting your password.';
 			if ($e instanceof ValidationException) {
+//                dd('Fallo en la validación'.$e->getMessage());
                 throw $e;
             } else if ($e instanceof CognitoIdentityProviderException) {
 				$message = $e->getAwsErrorMessage();
 			} else {
                 //Do nothing
+
             } //End if
 
 			return redirect()->back()
-                ->withInput($request->only('email'))
-				->with('status', 'error')
-				->withErrors('errors', $message);
+//            return redirect(route('login'))
+//                ->withInput($request->only('email'))
+                ->with('status', 'error')
+                ->with('message', $message);
 
         } //Try-catch ends
     }

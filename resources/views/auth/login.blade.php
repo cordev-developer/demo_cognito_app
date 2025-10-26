@@ -8,28 +8,30 @@
                 <div class="card-header">{{ __('Login') }}</div>
 
                 {{-- ✅ Succesfully message--}}
-                @if (session('status'))
+                @if (session('status') && session('status') !== 'error')
                     <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
                         <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
                             <use xlink:href="#check-circle-fill"/>
                         </svg>
                         <div>
-                            {{ session('status') }}
+                            {{ session('message') }}
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
 
-                @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
-                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-                    <ul class="p-0 m-0" style="list-style: none;">
-                        @foreach($errors->all() as $error)
-                            <li>{{$error}}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+{{--                @if($errors->any())--}}
+                @if(session('status') === 'error')
+                    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        <ul class="p-0 m-0" style="list-style: none;">
+{{--                            @foreach($errors->all() as $error)--}}
+{{--                                <li>{{$error->message}}</li>--}}
+{{--                            @endforeach--}}
+                            <li>{{ session('message')  }}</li>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
                 @endif
 
                 <div class="card-body">

@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 //use Auth;
 use Aws\CognitoIdentityProvider\Exception\CognitoIdentityProviderException;
+use Ellaisys\Cognito\Guards\CognitoSessionGuard;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,14 +26,20 @@ class WebMFAController extends BaseController
 
     /**
      * Action to activate Google Authenticator MFA
+     * @throws ValidationException
      */
-    public function actionActivateMFA()
+    public function actionActivateMFA(): \Illuminate\Http\RedirectResponse
     {
         try
         {
             $user = auth()->guard('web')->user();
+
+            // Cognito guard definition (Type Hint)
+            /** @var CognitoSessionGuard $cognitoGuard */
+            $cognitoGuard = auth()->guard('web');
             $response = $this->activateMFA();
-            $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
+
+            $userCognito = $cognitoGuard->getRemoteUserData($user->email);
 
             $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
 
@@ -49,9 +59,10 @@ class WebMFAController extends BaseController
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
                 $message = $e->getAwsErrorMessage();
-            } else {
-                //Do nothing
-            } //End if
+            }
+//            else {
+//                //Do nothing
+//            } //End if
 
             throw $e;
         } //Try-catch ends
@@ -60,14 +71,20 @@ class WebMFAController extends BaseController
 
     /**
      * Action to deactivate MFA Google Authenticator
+     * @throws ValidationException
      */
-    public function actionDeactivateMFA()
+    public function actionDeactivateMFA(): \Illuminate\Http\RedirectResponse
     {
         try
         {
             $user = auth()->guard('web')->user();
+
+            // Cognito guard definition (Type Hint)
+            /** @var CognitoSessionGuard $cognitoGuard */
+            $cognitoGuard = auth()->guard('web');
             $response = $this->deactivateMFA();
-            $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
+
+            $userCognito = $cognitoGuard->getRemoteUserData($user->email);
 
             //Return status to screen
             return back()
@@ -83,9 +100,10 @@ class WebMFAController extends BaseController
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
                 $message = $e->getAwsErrorMessage();
-            } else {
-                //Do nothing
-            } //End if
+            }
+//            else {
+//                //Do nothing
+//            } //End if
 
             throw $e;
         } //Try-catch ends
@@ -94,14 +112,27 @@ class WebMFAController extends BaseController
 
     /**
      * Action to enable SMS MFA
+     * @throws ValidationException
      */
-    public function actionEnableMFA()
+    public function actionEnableMFA(): \Illuminate\Http\RedirectResponse
     {
         try
         {
             $user = auth()->guard('web')->user();
+
+            // Cognito guard definition (Type Hint)
+            /** @var CognitoSessionGuard $cognitoGuard */
+            $cognitoGuard = auth()->guard('web');
             $response = $this->enableMFA('web', $user->email);
-            $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
+
+            // Using typed guard to call getRemoteUserData()
+            $userCognito = $cognitoGuard->getRemoteUserData($user->email);
+            //$userCognito = auth()->guard('web')->getRemoteUserData($user->email);
+
+            // Add this bloc bellow to disable warning in line 112
+            if ($response instanceof \Illuminate\Http\JsonResponse) {
+                $response = $response->getData(true); // getData(true) to convert json object into array
+            }
 
             $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
 
@@ -120,9 +151,10 @@ class WebMFAController extends BaseController
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
                 $message = $e->getAwsErrorMessage();
-            } else {
-                //Do nothing
-            } //End if
+            }
+//            else {
+//                //Do nothing
+//            } //End if
 
             throw $e;
         } //Try-catch ends
@@ -131,14 +163,25 @@ class WebMFAController extends BaseController
 
     /**
      * Action to disable SMS MFA
+     * @throws ValidationException
      */
-    public function actionDisableMFA()
+    public function actionDisableMFA(): \Illuminate\Http\RedirectResponse
     {
         try
         {
             $user = auth()->guard('web')->user();
+            // Cognito guard definition (Type Hint)
+            /** @var CognitoSessionGuard $cognitoGuard */
+            $cognitoGuard = auth()->guard('web');
             $response = $this->disableMFA('web', $user->email);
-            $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
+
+            // Using typed guard to call getRemoteUserData()
+            $userCognito = $cognitoGuard->getRemoteUserData($user->email);
+
+            // Add this bloc bellow to disable warning in line 112
+            if ($response instanceof \Illuminate\Http\JsonResponse) {
+                $response = $response->getData(true); // getData(true) to convert json object into array
+            }
 
             $status = isset($response['@metadata']['statusCode']) && $response['@metadata']['statusCode'] == 200;
 
@@ -157,9 +200,10 @@ class WebMFAController extends BaseController
                 $message = $e->errors();
             } else if ($e instanceof CognitoIdentityProviderException) {
                 $message = $e->getAwsErrorMessage();
-            } else {
-                //Do nothing
-            } //End if
+            }
+//            else {
+//                //Do nothing
+//            } //End if
 
             throw $e;
         } //Try-catch ends
@@ -179,8 +223,14 @@ class WebMFAController extends BaseController
             $deviceName = $request['device_name'];
 
             $user = auth()->guard('web')->user();
+            // Cognito guard definition (Type Hint)
+            /** @var CognitoSessionGuard $cognitoGuard */
+            $cognitoGuard = auth()->guard('web');
+
             $response = $this->verifyMFA('web', $code, $deviceName);
-            $userCognito = auth()->guard('web')->getRemoteUserData($user->email);
+
+            // Using typed guard to call getRemoteUserData()
+            $userCognito = $cognitoGuard->getRemoteUserData($user->email);
 
             //Return status to screen
             return back()
@@ -206,16 +256,21 @@ class WebMFAController extends BaseController
 
     /**
      * Authenticate using the MFA code using the Web console
+     * @param \Illuminate\Http\Request $request
+     * @return RedirectResponse|Redirector|mixed
+     * @throws ValidationException
      */
-    public function actionValidateMFA(Request $request)
+    public function actionValidateMFA(\Illuminate\Http\Request $request): mixed
     {
+        $collection = null;
+
         try
         {
             //Create credentials object
             $collection = collect($request->all());
 
             //Authenticate the user request
-            $response = $this->attemptLoginMFA($request);
+            $response = $this->attemptLoginMFA($collection);
             if ($response===true) {
                 $request->session()->regenerate();
                 return redirect(route('home'));
@@ -232,7 +287,7 @@ class WebMFAController extends BaseController
         } catch (Exception $e) {
             Log::error($e->getMessage());
             $response = $this->sendFailedLoginResponse($collection, $e);
-            return $response->back()->withInput($request->only('username', 'remember'));
+            return back()->withInput($request->only('username', 'remember'));
         } //try-catch ends
     } //Function ends
 

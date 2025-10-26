@@ -79,15 +79,12 @@ return [
     | during the to invitation for the new user. The default value is set to true.
     |
     */
-    'force_new_user_password' => env('AWS_COGNITO_FORCE_NEW_USER_PASSWORD', false),
+    'force_new_user_password' => env('AWS_COGNITO_FORCE_NEW_USER_PASSWORD', true),
 
 
     'new_user_message_action' => env('AWS_COGNITO_NEW_USER_MESSAGE_ACTION', null),
 
-    'force_password_change_web' => env('AWS_COGNITO_FORCE_PASSWORD_CHANGE_WEB', false),
+    'force_password_change_web' => env('AWS_COGNITO_FORCE_PASSWORD_CHANGE_WEB', true),
     'force_redirect_route_name' => env('AWS_COGNITO_FORCE_PASSWORD_ROUTE_NAME', 'cognito.form.change.password'),
-//    'force_redirect_route_name_2' => env('AWS_COGNITO_FORCE_PASSWORD_ROUTE_NAME_2', 'cognito.form.change.password_2'),
-//    'force_redirect_route_name_2' => 'cognito.form.change.password_2',
-
 
 ];

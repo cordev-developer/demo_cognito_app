@@ -6,68 +6,19 @@ use Ellaisys\Cognito\AwsCognitoClient;
 use Ellaisys\Cognito\Exceptions\InvalidUserFieldException;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
-
 use App\Models\User;
 use Ellaisys\Cognito\Auth\RegistersUsers;
 use Ellaisys\Cognito\Auth\SendsPasswordResetEmails;
 use Ellaisys\Cognito\Auth\ResetsPasswords;
 use Illuminate\Support\Collection;
-
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
-
 use Illuminate\Routing\Controller as BaseController;
 
-use Exception;
-use Ellaisys\Cognito\Exceptions\NoLocalUserException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class UserController extends BaseController
 {
     use RegistersUsers;
     use SendsPasswordResetEmails;
     use ResetsPasswords;
-
-    /*
-    public function webRegister(Request $request)
-    {
-        $cognitoRegistered=false;
-
-        $validator = $request->validate([
-            'first_name' => 'required|max:255',
-            'last_name' => 'required|max:255',
-            'email' => 'required|email|max:64|unique:users',
-            'password' => 'required|confirmed|min:6|max:64',
-        ]);
-
-        //User::create($request->only('name', 'email', 'password'));
-        $data = $request->only('first_name', 'email', 'password');
-        $data['name'] = $data['first_name'];
-        unset($data['first_name']);
-
-        //Create credentials object
-        $collection = collect($request->all());
-        Log::info($collection);
-
-        //Register User in Cognito
-        $cognitoRegistered=$this->createCognitoUser($collection);
-        if ($cognitoRegistered==true) {
-            unset($data['password']);
-            User::create($data);
-
-            //Send to login page
-            return view('auth.login');
-        } else {
-            return redirect()->back()
-            ->withInput()
-            ->with('status', 'error')
-            ->with('message', 'The given email exists')
-            ->withErrors(['email' => 'The email has already been taken.']);
-        } //End if
-    } //Function ends
-    */
 
     public function webRegister(Request $request)
     {
@@ -124,10 +75,10 @@ class UserController extends BaseController
             User::create($data);
 
             //Send to login page
-            return view('auth.login');
+//            return view('auth.login');
 
-            // Redirect to login page with success message
-            //return redirect()->route('login')->with('status', 'success')->with('message', 'User registered successfully. Please verify your email or phone number to activate your account.');
+            // Redirect to login page with successfully message
+            return redirect()->route('login')->with('status', 'success')->with('message', 'User registered successfully.');
         } else {
             // If Cognito fails (e.g., duplicate email or username)
             return redirect()->back()

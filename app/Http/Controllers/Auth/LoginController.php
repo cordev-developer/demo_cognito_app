@@ -70,10 +70,12 @@ class LoginController extends Controller
                 } else if ($response===false) {
                     return redirect()
                         ->back()
-                        ->withInput($request->only('username', 'remember'))
-                        ->withErrors([
-                            'username' => 'Incorrect username and/or password !!',
-                        ]);
+//                        ->withInput($request->only('username', 'remember'))
+//                        ->withErrors([
+//                            'username' => 'Incorrect username and/or password !!',
+//                        ]);
+                        ->with('status', 'error')
+                        ->with('message', 'Incorrect username and/or password !!');
 
                     //$this->incrementLoginAttempts($request);
                     //
@@ -86,8 +88,10 @@ class LoginController extends Controller
             Log::error($e->getMessage());
             return redirect()
                 ->back()
-                ->withInput($request->only('username', 'remember'))
-                ->withErrors(['error' => $e->getMessage()]);
+//                ->withInput($request->only('username', 'remember'))
+//                ->withErrors(['error' => $e->getMessage()]);
+                ->with('status', 'error')
+                ->with('message', 'Incorrect username and/or password !!');
         } //Try-catch ends
 
     } //Function ends
